@@ -1,0 +1,63 @@
+﻿@using Workflow.Domain.Extensions
+@using Workflow.UI.Helpers
+@{
+    Layout = "_ListLayout";
+    ViewBag.Title = "Liste des rôles";
+    ViewBag.Breadcrumb = "Rôles";
+    ViewBag.ButtonLabel = "Nouveau rôle";
+    ViewBag.controller = "Role";
+
+    var matrix = (ViewBag.Matrix as Dictionary<string, Dictionary<string, bool>>);
+    var allPermissions = matrix?.SelectMany(r => r.Value.Keys).Distinct().ToList();
+
+    Dictionary<string, List<string>> groupedPermissions = allPermissions
+            .GroupBy(p => p.Split('.')[1])
+            .ToDictionary(g => g.Key, g => g.OrderBy(p => p).ToList());
+
+    string FormatPermission(string perm)
+    {
+        var parts = perm.Split(".");
+        return parts.Length == 3 ? parts[2] : perm;
+    }
+}
+
+@section Table {
+    <table class="table table-bordered table-hover table-sm">
+        <thead>
+            <tr>
+                <th rowspan="2"></th>
+                @foreach (var group in groupedPermissions)
+                {
+                    <th colspan="@group.Value.Count" class="text-center">@group.Key</th>
+                }
+            </tr>
+            <tr>
+                @foreach (var perm in allPermissions)
+                {
+                    <th class="text-center">@FormatPermission(perm)</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var role in matrix)
+            {
+                <tr>
+                    <td >@role.Key</td>
+                    @foreach (var perm in allPermissions)
+                    {
+                        <td class="text-center">
+                            @if (role.Value.TryGetValue(perm, out var hasPerm) && hasPerm)
+                            {
+                                <span class="text-success"><i style="font-size: 1.5rem;" class="bi bi-check"></i></span>
+                            }
+                            else
+                            {
+                                <span class="text-danger"><i style="font-size: 1.5rem;" class="bi bi-x"></i></span>
+                            }
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+}

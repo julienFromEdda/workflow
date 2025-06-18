@@ -1,0 +1,75 @@
+﻿@using Workflow.Domain.Enums
+@using Workflow.Domain.Extensions
+@using Workflow.UI.Helpers
+@model Workflow.Domain.Entities.Seance
+@{
+    var typeName = Model.Type == TypeSeance.College ? "Séances du Collège" : "Séances du Conseil";
+    bool isConseil = Model.Type == TypeSeance.Conseil;
+    bool isPrevu = Model.Statut == StatutSeance.Prevu;
+
+    Layout = "_DetailLayout";
+    ViewBag.Title = "Détail de la séance";
+    ViewBag.Breadcrumb = typeName;
+    ViewBag.BreadcrumbRouteParams = new Dictionary<string, string> { { "Type", Model.Type.ToString() } };
+}
+
+@section Actions {
+    <div class="dropdown">
+        <button class="btn btn-success fs-6 dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Actions
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="#" onclick="loadModalContent('modal', '/Seance/Edit/@Model.Id', 'Modifier')">Modifier</a></li>
+            @if (User.IsInRole("Greffe") && isPrevu)
+            {
+                <li><a class="dropdown-item" href="#" onclick="loadModalContent('modal', '/POJ/Create', 'Ajouter un point à l\'ordre du jour')">Ajouter un point à l'ordre du jour</a></li>
+            }
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#" onclick="loadModalContent('modal', '/Seance/Delete/@Model.Id', 'Supprimer')">Supprimer</a></li>
+        </ul>
+    </div>
+}
+
+@section Message {
+    @if (TempData["VoteRefuse"] != null)
+    {
+        <div class="alert alert-warning">@TempData["VoteRefuse"]</div>
+    }
+}
+
+@section Content {
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">Informations générales</div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Type</dt>
+                <dd class="col-sm-9"><span class="badge @BadgeHelper.GetBadgeClass(Model.Type)">@Model.Type.GetDisplayName()</span></dd>
+
+                <dt class="col-sm-3">Statut</dt>
+                <dd class="col-sm-9"><span class="badge @BadgeHelper.GetBadgeClass(Model.Statut)">@Model.Statut.GetDisplayName()</span></dd>
+
+                <dt class="col-sm-3">Date</dt>
+                <dd class="col-sm-9">@Model.Date.ToShortDateString()</dd>
+
+                <dt class="col-sm-3">Heure</dt>
+                <dd class="col-sm-9">@Model.Heure</dd>
+            </dl>
+        </div>
+    </div>
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">Points à l'ordre du jour</div>
+        <div class="card-body">
+            <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+                @if (Model.POJs != null)
+                {
+                    @foreach (var poj in Model.POJs)
+                    {
+                        <div class="col">
+                            @await Html.PartialAsync("~/Views/POJ/Partials/Card.cshtml", poj)
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+}

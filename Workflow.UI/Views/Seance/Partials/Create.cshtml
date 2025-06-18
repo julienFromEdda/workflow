@@ -1,0 +1,8 @@
+﻿@model Workflow.Domain.Entities.Seance
+@{
+    Layout = null;
+    ViewBag.FormAction = "Create";
+    ViewBag.SubmitLabel = "Créer";
+}
+
+@await Html.PartialAsync("Partials/_FormulaireSeance", Model)

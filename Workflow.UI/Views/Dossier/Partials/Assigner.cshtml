@@ -1,0 +1,23 @@
+﻿@{
+    Layout = null;
+    var utilisateurs = ViewBag.Utilisateurs as List<SelectListItem> ?? new();
+    var dossierId = ViewBag.DossierId;
+}
+
+<form asp-action="Assigner">
+    <input type="hidden" name="id" value="@dossierId" />
+    <div class="form-floating mb-3">
+        <select name="nouvelEmployeId" class="form-select" required>
+            <option value="">-- Choisir un employé --</option>
+            @foreach (var u in utilisateurs)
+            {
+                <option value="@u.Value">@u.Text</option>
+            }
+        </select>
+        <label>Nouvel employé</label>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">Assigner</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+    </div>
+</form>

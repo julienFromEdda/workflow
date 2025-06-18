@@ -1,0 +1,16 @@
+﻿@model Workflow.Domain.Entities.Dossier
+@{
+    Layout = null;
+}
+
+<form asp-action="Archiver">
+    <input type="hidden" name="id" value="@Model.Id" />
+    <div class="alert alert-warning">
+        Êtes-vous sûr de vouloir archiver le dossier <strong>@Model.Titre</strong> ?<br />
+        Cette action modifiera son statut et il ne sera plus possible de modifier ce dossier.
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">Archiver</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+    </div>
+</form>

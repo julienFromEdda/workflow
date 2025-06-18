@@ -1,0 +1,27 @@
+﻿@model Workflow.Domain.Entities.Vote
+@using Workflow.Domain.Enums
+@{
+    Layout = null;
+}
+
+<form asp-action="SubmitVote" method="post">
+    <input type="hidden" name="pojId" value="@ViewData["PojId"]" />
+
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="valeur" value="Pour" id="votePour" @(Model.Valeur == TypeVote.Pour ? "checked" : "")>
+        <label class="form-check-label" for="votePour">Pour</label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="valeur" value="Contre" id="voteContre" @(Model.Valeur == TypeVote.Contre ? "checked" : "")>
+        <label class="form-check-label" for="voteContre">Contre</label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="valeur" value="Abstention" id="voteAbstention" @(Model.Valeur == TypeVote.Abstention ? "checked" : "")>
+        <label class="form-check-label" for="voteAbstention">Abstention</label>
+    </div>
+
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">Valider mon vote</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+    </div>
+</form>

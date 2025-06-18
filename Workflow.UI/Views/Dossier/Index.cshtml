@@ -1,0 +1,34 @@
+﻿@using Workflow.Domain.Extensions
+@using Workflow.UI.Helpers
+@model IEnumerable<Workflow.Domain.Entities.Dossier>
+@{
+    Layout = "_ListLayout";
+    ViewBag.Title = "Liste des dossiers";
+    ViewBag.Breadcrumb = "Dossiers";
+    ViewBag.ButtonLabel = "Nouveau dossier";
+    ViewBag.controller = "Dossier";
+}
+
+@section Table {
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Titre</th>
+                <th>Service</th>
+                <th>Date de création</th>
+                <th>Statut</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var d in Model)
+            {
+                <tr data-id="@d.Id" style="cursor:pointer;" onclick="location.href='@Url.Action("Details", new { id = d.Id })'">
+                    <td>@d.Titre</td>
+                    <td>@d.ServiceTraitant?.Nom</td>
+                    <td>@d.DateCreation.ToShortDateString()</td>
+                    <td><span class="badge @BadgeHelper.GetBadgeClass(d.Statut)">@d.Statut.GetDisplayName()</span></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

@@ -1,0 +1,23 @@
+﻿@{
+    Layout = null;
+    var services = ViewBag.Services as List<SelectListItem> ?? new();
+    var dossierId = ViewBag.DossierId;
+}
+
+<form asp-action="Transfert">
+    <input type="hidden" name="id" value="@dossierId" />
+    <div class="form-floating mb-3">
+        <select name="nouveauServiceId" class="form-select" required>
+            <option value="">-- Choisir un service --</option>
+            @foreach (var s in services)
+            {
+                <option value="@s.Value">@s.Text</option>
+            }
+        </select>
+        <label>Nouveau service</label>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">Transférer</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+    </div>
+</form>

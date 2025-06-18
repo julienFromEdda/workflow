@@ -1,0 +1,35 @@
+﻿@{
+    Layout = "_Layout";
+    var title = ViewData["Title"]?.ToString() ?? "Détail";
+    var breadcrumb = ViewBag.Breadcrumb ?? title;
+    var breadcrumbRouteParams = ViewBag.BreadcrumbRouteParams as IDictionary<string, string> ?? null;
+}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a asp-action="Index" asp-all-route-data="breadcrumbRouteParams">@breadcrumb</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">@title</li>
+    </ol>
+</nav>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">@title</h2>
+    @RenderSection("Actions", required: false)
+</div>
+@RenderSection("Message", required: false)
+@RenderSection("Content", required: true)
+
+<div class="modal fade" id="modal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel">Chargement...</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body">
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,15 @@
+﻿@model Workflow.Domain.Entities.Seance
+@{
+    Layout = null;
+}
+
+<form asp-action="Delete">
+    <input type="hidden" name="id" value="@Model.Id" />
+    <div class="alert alert-warning">
+        Êtes-vous sûr de vouloir supprimer la scéance ?<br />
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">Supprimer</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+    </div>
+</form>

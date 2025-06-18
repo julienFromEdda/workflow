@@ -1,0 +1,124 @@
+﻿@using Workflow.Domain.Enums
+@using Workflow.Domain.Extensions
+@using Workflow.UI.Helpers
+@model Workflow.Domain.Entities.Dossier
+@{
+    Layout = "_DetailLayout";
+    ViewBag.Title = "Détail du dossier";
+    ViewBag.Breadcrumb = "Dossiers";
+}
+
+@section Actions {
+    @if (Model.Statut == StatutDossier.Archive)
+    {
+        <span class="badge bg-secondary fs-6">Dossier archivé</span>
+    }
+    else
+    {
+        <div class="dropdown">
+            <button class="btn btn-success fs-6 dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Actions
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                @if (Model.EmployeTraitantId == null)
+                {
+                    <li><a class="dropdown-item" href="#" onclick="loadModalContent('modal', '/Dossier/Assigner/@Model.Id', 'Assigner')">Assigner</a></li>
+                }
+                else
+                {
+                    <li><a class="dropdown-item" href="#" onclick="loadModalContent('modal', '/Dossier/Edit/@Model.Id', 'Modifier')">Modifier</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="loadModalContent('modal', '/Document/Gerer?type=Dossier&objetId=@Model.Id', 'Gérer les documents', () => {bindUploadForm('modal', 'upload-doc-form'); bindDeleteDocumentForms('modal');})">Gérer les documents</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="loadModalContent('modal', '/Dossier/Transfert/@Model.Id', 'Transférer')">Transférer</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="loadModalContent('modal', '/Dossier/Assigner/@Model.Id', 'Assigner')">Assigner</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="#" onclick="loadModalContent('modal', '/Dossier/Archiver/@Model.Id', 'Archiver')">Archiver</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="loadModalContent('modal', '/Dossier/Delete/@Model.Id', 'Supprimer')">Supprimer</a></li>
+                }
+            </ul>
+        </div>
+    }
+}
+
+@section Content {
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">Informations générales</div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Titre</dt>
+                <dd class="col-sm-9">@Model.Titre</dd>
+
+                <dt class="col-sm-3">Description</dt>
+                <dd class="col-sm-9">@(!string.IsNullOrWhiteSpace(Model.Description) ? Model.Description : "-")</dd>
+
+                <dt class="col-sm-3">Intervenant</dt>
+                <dd class="col-sm-9">@(!string.IsNullOrWhiteSpace(Model.Intervenant) ? Model.Intervenant : "-")</dd>
+
+                <dt class="col-sm-3">Statut</dt>
+                <dd class="col-sm-9"><span class="badge @BadgeHelper.GetBadgeClass(Model.Statut)">@Model.Statut.GetDisplayName()</span></dd>
+
+                <dt class="col-sm-3">Employé traitant</dt>
+                <dd class="col-sm-9">@Model.EmployeTraitant?.Nom @Model.EmployeTraitant?.Prenom</dd>
+
+                <dt class="col-sm-3">Service traitant</dt>
+                <dd class="col-sm-9">@Model.ServiceTraitant?.Nom</dd>
+
+                <dt class="col-sm-3">Date de création</dt>
+                <dd class="col-sm-9">@Model.DateCreation.ToString("dd/MM/yyyy HH:mm")</dd>
+
+                <dt class="col-sm-3">Date de modification</dt>
+                <dd class="col-sm-9">@Model.DateModification.ToString("dd/MM/yyyy HH:mm")</dd>
+            </dl>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">Documents</div>
+        <div class="card-body">
+            @if (Model.Documents != null && Model.Documents.Any())
+            {
+                <ul class="list-group mb-3">
+                    @foreach (var doc in Model.Documents)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <a href="@doc.Url" target="_blank">@doc.NomFichier</a>
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <p class="text-muted">Aucun document associé.</p>
+            }
+        </div>
+    </div>
+
+    @if (Model.Historique != null && Model.Historique.Any())
+    {
+        <div class="card mb-4">
+            <div class="card-header bg-secondary text-white">Historique des actions</div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Action</th>
+                            <th>Effectuée par</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var action in Model.Historique.OrderByDescending(a => a.Date))
+                        {
+                            <tr>
+                                <td>@action.Date.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>@action.Action</td>
+                                <td>@action.Utilisateur?.Nom @action.Utilisateur?.Prenom</td>
+                                <td>@action.Description</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+}

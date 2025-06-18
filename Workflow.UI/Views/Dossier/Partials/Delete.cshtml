@@ -1,0 +1,16 @@
+﻿@model Workflow.Domain.Entities.Dossier
+@{
+    Layout = null;
+}
+
+<form asp-action="Delete">
+    <input type="hidden" name="id" value="@Model.Id" />
+    <div class="alert alert-warning">
+        Êtes-vous sûr de vouloir supprimer le dossier <strong>@Model.Titre</strong> ?<br />
+        Cette action modifiera son statut mais ne le supprimera pas physiquement.
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">Supprimer</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+    </div>
+</form>

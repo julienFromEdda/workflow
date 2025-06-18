@@ -1,0 +1,37 @@
+﻿@model IEnumerable<Workflow.Domain.Entities.Document>
+@{
+    Layout = null;
+    var typeObjet = ViewBag.TypeObjet as string;
+    var objetId = ViewBag.ObjetId;
+}
+
+@if (Model.Any())
+{
+    <ul class="list-group mb-3">
+        @foreach (var doc in Model)
+        {
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <a href="@doc.Url" target="_blank">@doc.NomFichier</a>
+                <form method="post" action="/Document/Delete" class="ms-3 delete-doc-form" asp-antiforgery="true">
+                    <input type="hidden" name="id" value="@doc.Id" />
+                    <input type="hidden" name="type" value="@typeObjet" />
+                    <input type="hidden" name="objetId" value="@objetId" />
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Supprimer</button>
+                </form>
+            </li>
+        }
+    </ul>
+}
+else
+{
+    <p class="text-muted">Aucun document associé.</p>
+}
+
+<form method="post" enctype="multipart/form-data" id="upload-doc-form" action="/Document/Upload" asp-antiforgery="true">
+    <input type="hidden" name="type" value="@typeObjet" />
+    <input type="hidden" name="objetId" value="@objetId" />
+    <div class="input-group mb-3">
+        <input type="file" name="fichier" class="form-control" required />
+        <button type="submit" class="btn btn-primary">Ajouter</button>
+    </div>
+</form>

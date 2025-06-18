@@ -1,0 +1,111 @@
+﻿@using Workflow.Domain.Extensions
+@using Workflow.UI.Helpers
+@{
+    ViewData["Title"] = "Accueil";
+    var notifications = ViewBag.Notifications as List<Workflow.Domain.Entities.Notification> ?? [];
+    var dossiers = ViewBag.Dossiers as List<Workflow.Domain.Entities.Dossier> ?? [];
+    var seance = ViewBag.Seance as Workflow.Domain.Entities.Seance;
+    var pojs = ViewBag.POJs as List<Workflow.Domain.Entities.PointOrdreJour> ?? [];
+}
+
+<h2 class="mb-4">Bienvenue</h2>
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">Dernières notifications</div>
+            <div class="card-body">
+                @if (notifications.Any())
+                {
+                    <ul class="list-group">
+                        @foreach (var notif in notifications)
+                        {
+                            <li class="list-group-item">
+                                @notif.Message @* <small class="text-muted">(@notif.Date.ToShortDateString())</small> *@
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="text-muted">Aucune notification récente.</p>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">Derniers dossiers du service</div>
+            <div class="card-body">
+                @if (dossiers.Any())
+                {
+                    <ul class="list-group">
+                        @foreach (var d in dossiers)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center" style="cursor:pointer;" onclick="location.href='@Url.Action("Details", "Dossier", new { id = d.Id })'">
+                                @d.Titre <span class="badge @BadgeHelper.GetBadgeClass(d.Statut)">@d.Statut.GetDisplayName()</span>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="text-muted">Aucun dossier récent pour votre service.</p>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">Prochaine séance</div>
+            <div class="card-body">
+                @if (seance != null)
+                {
+                    <p><strong>Date :</strong> @seance.Date.ToShortDateString()</p>
+                    <p><strong>Heure :</strong> @seance.Heure</p>
+                    <p><strong>Type :</strong> @seance.Type</p>
+                }
+                else
+                {
+                    <p class="text-muted">Aucune séance planifiée prochainement.</p>
+                }
+            </div>
+        </div>
+    </div>
+    
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">Points à voter</div>
+                <div class="card-body">
+                @if (pojs.Any())
+                {
+                    <ul class="list-group">
+                        @foreach (var p in pojs)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                @p.Titre
+                                <a href="#" onclick="loadModalContent('modal', '/Vote/Vote/@p.Id', 'Voter sur le point : @p.Titre')" class="btn btn-sm btn-outline-primary">Voter</a>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="text-muted">Vous avez répondu à tous les votes en cours.</p>
+                }
+            </div>
+            </div>
+        </div>
+</div>
+
+<div class="modal fade" id="modal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel">Chargement...</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body"></div>
+        </div>
+    </div>
+</div>

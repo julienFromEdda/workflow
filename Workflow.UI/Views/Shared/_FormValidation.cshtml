@@ -1,0 +1,44 @@
+@section Scripts {
+    <script src="~/js/validation-utils.js" asp-append-version="true"></script>
+    <script>
+        // Initialize validation for this form
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.querySelector('form[data-val="true"]');
+            if (form) {
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    
+                    // Reset validation
+                    ValidationUtils.resetValidation(form);
+                    
+                    let isValid = true;
+                    
+                    // Validate all fields
+                    const fields = form.querySelectorAll('input, select, textarea');
+                    fields.forEach(field => {
+                        const validation = ValidationUtils.validateField(field);
+                        if (!validation.isValid) {
+                            isValid = false;
+                            ValidationUtils.showValidationMessage(field, validation.message);
+                        }
+                    });
+
+                    // Validate roles if present
+                    const rolesValidation = ValidationUtils.validateRoles(form);
+                    if (!rolesValidation.isValid) {
+                        isValid = false;
+                        const validationSummary = form.querySelector('.validation-summary-errors');
+                        if (validationSummary) {
+                            validationSummary.textContent = rolesValidation.message;
+                        }
+                    }
+
+                    // If form is valid, submit it
+                    if (isValid) {
+                        form.submit();
+                    }
+                });
+            }
+        });
+    </script>
+}

@@ -1,0 +1,47 @@
+﻿@{
+    Layout = "_Layout";
+
+    string buttonLabel = ViewBag.ButtonLabel;
+    string controller = ViewBag.controller ?? "#";
+    string breadcrumb = ViewBag.Breadcrumb ?? "Section";
+    string pageTitle = ViewBag.Title?.ToString() ?? "Liste";
+}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item active" aria-current="page">@breadcrumb</li>
+    </ol>
+</nav>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">@pageTitle</h2>
+
+    @if (@buttonLabel != null)
+    {
+        <button class="btn btn-success fs-6" id="btnAdd" data-url="@Url.Action("Create", @controller)">
+            @buttonLabel
+        </button>
+    }
+</div>
+
+@RenderSection("Table", required: true)
+
+<div class="modal fade" id="modal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel">Chargement...</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('btnAdd')?.addEventListener('click', function () {
+            loadModalContent('modal', this.getAttribute('data-url'), '@buttonLabel');
+        });
+    </script>
+}
