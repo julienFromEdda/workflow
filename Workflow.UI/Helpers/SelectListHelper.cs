@@ -16,4 +16,19 @@ public static class SelectListHelper
                 Selected = selected.HasValue && EqualityComparer<TEnum>.Default.Equals(selected.Value, e)
             });
     }
+
+    public static SelectList EnumToSelectListExcluding<TEnum>(TEnum selected, params TEnum[] exclude) where TEnum : Enum
+    {
+        var items = Enum.GetValues(typeof(TEnum))
+            .Cast<TEnum>()
+            .Where(e => !exclude.Contains(e))
+            .Select(e => new SelectListItem
+            {
+                Value = e.ToString(),
+                Text = (e as Enum).GetDisplayName(),
+                Selected = e.Equals(selected)
+            });
+
+        return new SelectList(items, "Value", "Text", selected);
+    }
 }

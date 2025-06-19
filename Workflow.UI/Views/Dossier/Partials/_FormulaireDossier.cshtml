@@ -41,7 +41,7 @@
     @if (ViewBag.FormAction == "Edit")
     {
         <div class="form-floating mb-3">
-            <select asp-for="Statut" class="form-select" asp-items="SelectListHelper.EnumToSelectList<StatutDossier>(Model.Statut)">
+            <select asp-for="Statut" class="form-select" asp-items="SelectListHelper.EnumToSelectListExcluding(Model.Statut, StatutDossier.Supprime, StatutDossier.Archive)">
                 <option value="">-- Sélectionnez un statut --</option>
             </select>
             <label asp-for="Statut">Statut</label>
