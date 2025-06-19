@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Workflow.Domain.Entities;
+using Workflow.Domain.Security;
 using Workflow.Persistence;
 
 namespace Workflow.UI.Controllers;
@@ -15,13 +16,13 @@ public class HomeController(UserManager<Utilisateur> userManager, WFContext cont
         var user = await userManager.GetUserAsync(User);
 
         var notifications = await context.Notifications
-            .Where(n => n.UtilisateurId == user.Id)
+            .Where(n => n.UtilisateurId == user!.Id)
             .OrderByDescending(n => n.Lu)
             .Take(5)
             .ToListAsync();
 
         var dossiers = await context.Dossiers
-            .Where(d => d.ServiceTraitantId == user.ServiceId && d.Statut != Domain.Enums.StatutDossier.Supprime)
+            .Where(d => d.ServiceTraitantId == user!.ServiceId && d.Statut != Domain.Enums.StatutDossier.Supprime)
             .OrderByDescending(d => d.DateCreation)
             .Take(5)
             .ToListAsync();
@@ -32,13 +33,13 @@ public class HomeController(UserManager<Utilisateur> userManager, WFContext cont
             .FirstOrDefaultAsync();
 
         var pojsAVoter = Enumerable.Empty<PointOrdreJour>();
-        if (await userManager.IsInRoleAsync(user, "MembreConseil"))
+        if (User.HasClaim("permission", Permissions.Vote.Voter))
         {
             pojsAVoter = await context.PointsOrdreJour
                 .Include(p => p.Seance)
-                .Where(p => p.Seance.Type == Domain.Enums.TypeSeance.Conseil
-                         && p.Seance.Statut == Domain.Enums.StatutSeance.Prevu
-                         && !p.Votes.Any(v => v.UtilisateurId == user.Id))
+                .Where(p => p.Seance!.Type == Domain.Enums.TypeSeance.Conseil
+                         && p.Seance!.Statut == Domain.Enums.StatutSeance.Prevu
+                         && !p.Votes.Any(v => v.UtilisateurId == user!.Id))
                 .Take(5)
                 .ToListAsync();
         }

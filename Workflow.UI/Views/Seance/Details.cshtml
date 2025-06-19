@@ -1,5 +1,6 @@
 ﻿@using Workflow.Domain.Enums
 @using Workflow.Domain.Extensions
+@using Workflow.Domain.Security
 @using Workflow.UI.Helpers
 @model Workflow.Domain.Entities.Seance
 @{
@@ -19,13 +20,22 @@
             Actions
         </button>
         <ul class="dropdown-menu dropdown-menu-end">
-            <li><a class="dropdown-item" href="#" onclick="loadModalContent('modal', '/Seance/Edit/@Model.Id', 'Modifier')">Modifier</a></li>
-            @if (User.IsInRole("Greffe") && isPrevu)
+            @if (User.HasClaim("permission", Permissions.Seance.Modifier))
+            {
+                <li><a class="dropdown-item" href="#" onclick="loadModalContent('modal', '/Seance/Edit/@Model.Id', 'Modifier')">Modifier</a></li>
+            }
+
+            @if (User.HasClaim("permission", Permissions.POJ.Creer) && isPrevu)
             {
                 <li><a class="dropdown-item" href="#" onclick="loadModalContent('modal', '/POJ/Create', 'Ajouter un point à l\'ordre du jour')">Ajouter un point à l'ordre du jour</a></li>
             }
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="#" onclick="loadModalContent('modal', '/Seance/Delete/@Model.Id', 'Supprimer')">Supprimer</a></li>
+
+            @if (User.HasClaim("permission", Permissions.Seance.Modifier))
+            {
+                <li><a class="dropdown-item" href="#" onclick="loadModalContent('modal', '/Seance/Delete/@Model.Id', 'Supprimer')">Supprimer</a></li>
+            }
+
         </ul>
     </div>
 }

@@ -3,11 +3,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Workflow.Application.Helpers;
 using Workflow.Domain.Entities;
+using Workflow.Domain.Security;
 using Workflow.Persistence;
 
 namespace Workflow.UI.Controllers;
 
-[Authorize]
+[Authorize(Policy = Permissions.Dossier.GererDocuments)]
 public class DocumentController(WFContext context) : Controller
 {
     [HttpGet]
@@ -54,7 +55,7 @@ public class DocumentController(WFContext context) : Controller
         if (doc == null || doc.TypeObjet != type || doc.ObjetId != objetId)
             return NotFound();
 
-        var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", doc.Url.TrimStart('/'));
+        var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", doc.Url!.TrimStart('/'));
         if (System.IO.File.Exists(filePath))
             System.IO.File.Delete(filePath);
 

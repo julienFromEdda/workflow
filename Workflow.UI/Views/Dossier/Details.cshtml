@@ -1,5 +1,6 @@
 ﻿@using Workflow.Domain.Enums
 @using Workflow.Domain.Extensions
+@using Workflow.Domain.Security
 @using Workflow.UI.Helpers
 @model Workflow.Domain.Entities.Dossier
 @{
@@ -20,19 +21,27 @@
                 Actions
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
-                @if (Model.EmployeTraitantId == null)
+                @if (User.HasClaim("permission", Permissions.Dossier.Acces))
                 {
-                    <li><a class="dropdown-item" href="#" onclick="loadModalContent('modal', '/Dossier/Assigner/@Model.Id', 'Assigner')">Assigner</a></li>
-                }
-                else
-                {
-                    <li><a class="dropdown-item" href="#" onclick="loadModalContent('modal', '/Dossier/Edit/@Model.Id', 'Modifier')">Modifier</a></li>
-                    <li><a class="dropdown-item" href="#" onclick="loadModalContent('modal', '/Document/Gerer?type=Dossier&objetId=@Model.Id', 'Gérer les documents', () => {bindUploadForm('modal', 'upload-doc-form'); bindDeleteDocumentForms('modal');})">Gérer les documents</a></li>
-                    <li><a class="dropdown-item" href="#" onclick="loadModalContent('modal', '/Dossier/Transfert/@Model.Id', 'Transférer')">Transférer</a></li>
-                    <li><a class="dropdown-item" href="#" onclick="loadModalContent('modal', '/Dossier/Assigner/@Model.Id', 'Assigner')">Assigner</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="#" onclick="loadModalContent('modal', '/Dossier/Archiver/@Model.Id', 'Archiver')">Archiver</a></li>
-                    <li><a class="dropdown-item" href="#" onclick="loadModalContent('modal', '/Dossier/Delete/@Model.Id', 'Supprimer')">Supprimer</a></li>
+                    @if (Model.EmployeTraitantId == null)
+                    {
+                        <li><a class="dropdown-item" href="#" onclick="loadModalContent('modal', '/Dossier/Assigner/@Model.Id', 'Assigner')">Assigner</a></li>
+                    }
+                    else
+                    {
+                        <li><a class="dropdown-item" href="#" onclick="loadModalContent('modal', '/Dossier/Edit/@Model.Id', 'Modifier')">Modifier</a></li>
+
+                        @if (User.HasClaim("permission", Permissions.Dossier.GererDocuments))
+                        {
+                            <li><a class="dropdown-item" href="#" onclick="loadModalContent('modal', '/Document/Gerer?type=Dossier&objetId=@Model.Id', 'Gérer les documents', () => {bindUploadForm('modal', 'upload-doc-form'); bindDeleteDocumentForms('modal');})">Gérer les documents</a></li>
+                        }
+                        
+                        <li><a class="dropdown-item" href="#" onclick="loadModalContent('modal', '/Dossier/Transfert/@Model.Id', 'Transférer')">Transférer</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="loadModalContent('modal', '/Dossier/Assigner/@Model.Id', 'Assigner')">Assigner</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" onclick="loadModalContent('modal', '/Dossier/Archiver/@Model.Id', 'Archiver')">Archiver</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="loadModalContent('modal', '/Dossier/Delete/@Model.Id', 'Supprimer')">Supprimer</a></li>
+                    }
                 }
             </ul>
         </div>

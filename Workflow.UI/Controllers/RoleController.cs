@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using Workflow.Domain.Entities;
 using Workflow.Domain.Security;
+using Workflow.UI.Models;
 
 namespace Workflow.UI.Controllers;
 
@@ -12,26 +14,29 @@ public class RoleController(RoleManager<Role> roleManager) : Controller
     public async Task<IActionResult> Index()
     {
         var roles = roleManager.Roles.ToList();
-        var allPermissions = Permissions.GetRolePermissions().SelectMany(kv => kv.Value).Distinct().ToList();
+        var allPerms = Permissions.GetRolePermissions().SelectMany(kv => kv.Value).Distinct().ToList();
 
         var matrix = new Dictionary<string, Dictionary<string, bool>>();
 
         foreach (var role in roles)
         {
             var claims = await roleManager.GetClaimsAsync(role);
-            var permMap = new Dictionary<string, bool>();
-
-            foreach (var perm in allPermissions)
-            {
-                permMap[perm] = claims.Any(c => c.Type == "permission" && c.Value == perm);
-            }
-
-            matrix[role.Name!] = permMap;
+            matrix[role.Name!] = allPerms.ToDictionary(
+                perm => perm,
+                perm => claims.Any(c => c.Type == "permission" && c.Value == perm));
         }
 
-        ViewBag.Matrix = matrix;
+        var grouped = allPerms
+            .GroupBy(p => p.Split('.')[1])
+            .ToDictionary(g => g.Key, g => g.OrderBy(p => p).ToList());
 
-        return View();
+        var vm = new RolePermissionsViewModel
+        {
+            Matrix = matrix,
+            GroupedPermissions = grouped
+        };
+
+        return View(vm);
     }
 
     public IActionResult Create()
@@ -45,45 +50,54 @@ public class RoleController(RoleManager<Role> roleManager) : Controller
     {
         if (ModelState.IsValid)
         {
-            //await service.CreerDossierAsync(dossier);
+            await roleManager.CreateAsync(role);
 
             return RedirectToAction(nameof(Index));
         }
         return PartialView("Partials/Create", role);
     }
 
-    //[HttpGet("{roleName}/permissions")]
-    //public async Task<IActionResult> GetPermissions(string roleName)
-    //{
-    //    var role = await roleManager.FindByNameAsync(roleName);
-    //    if (role == null) return NotFound();
+    [HttpPost]
+    public async Task<IActionResult> UpdatePermission(string roleName, string permission, bool value)
+    {
+        var role = await roleManager.FindByNameAsync(roleName);
+        if (role == null) return NotFound();
 
-    //    var claims = await roleManager.GetClaimsAsync(role);
-    //    var allPermissions = Permissions.GetRolePermissions().SelectMany(kv => kv.Value).Distinct();
-    //    var result = allPermissions.ToDictionary(
-    //        perm => perm,
-    //        perm => claims.Any(c => c.Type == "permission" && c.Value == perm));
+        if (role.Name == "SuperAdmin" && permission == Permissions.Utilisateur.Gerer && !value)
+        {
+            TempData["Error"] = "Impossible de retirer la gestion des utilisateurs au rôle SuperAdmin.";
+            return RedirectToAction(nameof(Index));
+        }
 
-    //    return Ok(result);
-    //}
+        var claims = await roleManager.GetClaimsAsync(role);
+        var hasClaim = claims.Any(c => c.Type == "permission" && c.Value == permission);
 
-    //[HttpPost("{roleName}/permissions")]
-    //public async Task<IActionResult> UpdatePermissions(string roleName, [FromBody] Dictionary<string, bool> permissions)
-    //{
-    //    var role = await roleManager.FindByNameAsync(roleName);
-    //    if (role == null) return NotFound();
+        if (value && !hasClaim)
+            await roleManager.AddClaimAsync(role, new Claim("permission", permission));
+        else if (!value && hasClaim)
+            await roleManager.RemoveClaimAsync(role, new Claim("permission", permission));
 
-    //    var existingClaims = await roleManager.GetClaimsAsync(role);
+        return RedirectToAction(nameof(Index));
+    }
 
-    //    foreach (var perm in permissions)
-    //    {
-    //        var hasClaim = existingClaims.Any(c => c.Type == "permission" && c.Value == perm.Key);
-    //        if (perm.Value && !hasClaim)
-    //            await roleManager.AddClaimAsync(role, new Claim("permission", perm.Key));
-    //        else if (!perm.Value && hasClaim)
-    //            await roleManager.RemoveClaimAsync(role, new Claim("permission", perm.Key));
-    //    }
+    [HttpPost]
+    public async Task<IActionResult> Delete(string roleName)
+    {
+        if (roleName == "SuperAdmin")
+        {
+            TempData["Error"] = "Le rôle SuperAdmin ne peut pas être supprimé.";
+            return RedirectToAction(nameof(Index));
+        }
 
-    //    return NoContent();
-    //}
+        var role = await roleManager.FindByNameAsync(roleName);
+        if (role == null)
+        {
+            TempData["Error"] = "Rôle introuvable.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        await roleManager.DeleteAsync(role);
+        TempData["Success"] = $"Le rôle {roleName} a été supprimé.";
+        return RedirectToAction(nameof(Index));
+    }
 }

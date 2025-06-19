@@ -42,12 +42,15 @@ public class SeanceService(WFContext context) : ISeanceService
                 .ThenInclude(p => p.Documents)
             .FirstOrDefaultAsync(s => s.Id == id);
 
-        seances?.POJs?.ToList().ForEach(async p =>
+        if (seances?.POJs != null)
         {
-            p.Documents = await context.Documents
-                 .Where(d => d.TypeObjet == "POJ" && d.ObjetId == p.Id)
-                 .ToListAsync();
-        });
+            foreach (var p in seances.POJs)
+            {
+                p.Documents = await context.Documents
+                    .Where(d => d.TypeObjet == "POJ" && d.ObjetId == p.Id)
+                    .ToListAsync();
+            }
+        }
 
 
         return seances;

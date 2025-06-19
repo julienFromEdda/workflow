@@ -4,10 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 using Workflow.Domain.Entities;
 using Workflow.Domain.Enums;
 using Workflow.Domain.Interfaces;
+using Workflow.Domain.Security;
 
 namespace Workflow.UI.Controllers;
 
-[Authorize(Roles = "MembreConseil")]
+[Authorize(Policy = Permissions.Vote.Voter)]
 public class VoteController(IVoteService voteService, IPOJService pojService, UserManager<Utilisateur> userManager) : Controller
 {
     public async Task<IActionResult> Vote(int id)

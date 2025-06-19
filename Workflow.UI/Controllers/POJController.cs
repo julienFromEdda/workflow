@@ -74,6 +74,7 @@ public class POJController(IPOJService pojService, WFContext context) : Controll
         return PartialView("Partials/Edit", poj);
     }
 
+    [Authorize(Policy = Permissions.POJ.Supprimer)]
     public async Task<IActionResult> Delete(int id)
     {
         var poj = await pojService.GetByIdAsync(id);
