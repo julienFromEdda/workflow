@@ -56,3 +56,11 @@ Une interface permet :
 | `Workflow.Application`   | Services applicatifs (logique métier)              |
 | `Workflow.Persistence`   | Accès aux données via Entity Framework Core        |
 | `Workflow.UI`            | ASP.NET MVC, contrôleurs, vues, layout, Identity
+
+## Base de données
+
+- Utilise **Entity Framework Core** avec **SQLite**
+- Utilise des `DbSet<>` pour chaque entité : `Dossier`, `Seance`, `PointOrdreJour`, `Document`, `Vote`, etc.
+- Gestion des permissions via `AspNetRoleClaims` et `IdentityRole`
+
+![Schéma de la base de données](documentation/schema.png)
