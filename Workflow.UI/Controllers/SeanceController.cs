@@ -80,10 +80,10 @@ public class SeanceController(ISeanceService service) : Controller
     [Authorize(Policy = Permissions.Seance.Modifier)]
     public async Task<IActionResult> Delete(int id)
     {
-        var dossier = await service.GetByIdAsync(id);
-        if (dossier == null) return NotFound();
+        var seance = await service.GetByIdAsync(id);
+        if (seance == null) return NotFound();
 
-        return PartialView("Partials/Delete", dossier);
+        return PartialView("Partials/Delete", seance);
     }
 
     [HttpPost, ActionName("Delete")]

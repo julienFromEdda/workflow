@@ -32,7 +32,7 @@ builder.Services.AddScoped<IPOJService, POJService>();
 builder.Services.AddScoped<IVoteService, VoteService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IActionDossierService, ActionDossierService>();
-
+builder.Services.AddScoped<IServiceService, ServiceService>();
 
 builder.Services.Configure<IdentityOptions>(options =>
 {

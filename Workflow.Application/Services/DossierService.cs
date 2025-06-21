@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Workflow.Domain.DTOs;
 using Workflow.Domain.Entities;
 using Workflow.Domain.Enums;
 using Workflow.Domain.Exceptions;
@@ -103,14 +104,45 @@ public class DossierService(WFContext context, IActionDossierService actionDossi
         return dossier;
     }
 
-    public async Task<IEnumerable<Dossier>> GetAllAsync()
+    public async Task<PagedResult<Dossier>> GetFilteredAsync(ListFilterDTO filtre)
     {
         var user = await currentUser.GetUserAsync();
-        return await context.Dossiers
+
+        var query = context.Dossiers
             .Include(d => d.ServiceTraitant)
             .Where(d => d.ServiceTraitantId == user!.ServiceId)
-            .Where(d => d.Statut != StatutDossier.Supprime)
+            .Where(d => d.Statut != StatutDossier.Supprime);
+
+        if (!string.IsNullOrWhiteSpace(filtre.Recherche))
+        {
+            var recherche = filtre.Recherche.ToLower();
+            query = query.Where(d => d.Titre.ToLower().Contains(recherche));
+        }
+
+        if (!string.IsNullOrEmpty(filtre.TriPar))
+        {
+            query = filtre.TriPar switch
+            {
+                "titre" => filtre.TriDesc ? query.OrderByDescending(d => d.Titre) : query.OrderBy(d => d.Titre),
+                "service" => filtre.TriDesc ? query.OrderByDescending(d => d.ServiceTraitant!.Nom) : query.OrderBy(d => d.ServiceTraitant!.Nom),
+                "date" => filtre.TriDesc ? query.OrderByDescending(d => d.DateCreation) : query.OrderBy(d => d.DateCreation),
+                _ => query
+            };
+        }
+
+        var total = await query.CountAsync();
+        var items = await query
+            .Skip((filtre.Page - 1) * filtre.PageSize)
+            .Take(filtre.PageSize)
             .ToListAsync();
+
+        return new PagedResult<Dossier>
+        {
+            Items = items,
+            Page = filtre.Page,
+            PageSize = filtre.PageSize,
+            TotalItems = total
+        };
     }
 
     public async Task Archive(int id)

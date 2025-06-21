@@ -1,10 +1,14 @@
-﻿@{
+﻿@using Workflow.Domain.DTOs
+@{
     Layout = "_Layout";
 
     string buttonLabel = ViewBag.ButtonLabel;
     string controller = ViewBag.controller ?? "#";
     string breadcrumb = ViewBag.Breadcrumb ?? "Section";
     string pageTitle = ViewBag.Title?.ToString() ?? "Liste";
+    string recherche = Context.Request.Query["Recherche"];
+    
+    var paged = Model as IPagedResult;
 }
 
 <nav aria-label="breadcrumb">
@@ -24,7 +28,45 @@
     }
 </div>
 
+@if (ViewBag.EnableFilters == true)
+{
+    <form method="get" id="search-form" class="mb-3">
+        <div class="input-group">
+            <input type="text" name="Recherche" class="form-control" placeholder="Rechercher..." value="@recherche" />
+        </div>
+    </form>
+}
+
 @RenderSection("Table", required: true)
+
+
+@if (ViewBag.EnableFilters == true && paged != null)
+{
+    int currentPage = paged!.Page;
+    int totalPages = paged.TotalPages;
+    string triPar = Context.Request.Query["TriPar"];
+    bool triDesc = Context.Request.Query["TriDesc"] == "true";
+
+    if (totalPages > 1)
+    {
+        <nav aria-label="Pagination">
+            <ul class="pagination justify-content-end">
+                @for (int i = 1; i <= totalPages; i++)
+                {
+                    <li class="page-item @(i == currentPage ? "active" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new {
+                            Page = i,
+                            Recherche = recherche,
+                            TriPar = triPar,
+                            TriDesc = triDesc
+                        })">@i</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+}
+
 
 <div class="modal fade" id="modal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -40,8 +82,37 @@
 
 @section Scripts {
     <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            if (sessionStorage.getItem('focusRecherche') === '1') {
+                const input = document.querySelector('#search-form input[name="Recherche"]');
+                input?.focus();
+                input.setSelectionRange(input.value.length, input.value.length);
+                sessionStorage.removeItem('focusRecherche');
+            }
+        });
+
         document.getElementById('btnAdd')?.addEventListener('click', function () {
             loadModalContent('modal', this.getAttribute('data-url'), '@buttonLabel');
+        });
+
+        const input = document.querySelector('#search-form input[name="Recherche"]');
+        let timeout = null;
+
+        input?.addEventListener('input', function () {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                sessionStorage.setItem('focusRecherche', '1');
+                document.getElementById('search-form').submit();
+            }, 400);
+        });
+
+        document.querySelectorAll('.sortable[data-url]').forEach(el => {
+            el.addEventListener('click', () => {
+                const url = el.getAttribute('data-url');
+                if (url) {
+                    window.location.href = url;
+                }
+            });
         });
     </script>
 }

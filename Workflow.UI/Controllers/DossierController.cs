@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Workflow.Domain.DTOs;
 using Workflow.Domain.Entities;
 using Workflow.Domain.Exceptions;
 using Workflow.Domain.Interfaces;
@@ -12,11 +13,10 @@ namespace Workflow.UI.Controllers;
 [Authorize(Policy = Permissions.Dossier.Acces)]
 public class DossierController(IDossierService service) : Controller
 {
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index([FromQuery] ListFilterDTO filtre)
     {
-        return View(await service.GetAllAsync());
+        return View(await service.GetFilteredAsync(filtre));
     }
-
 
     public IActionResult Create()
     {

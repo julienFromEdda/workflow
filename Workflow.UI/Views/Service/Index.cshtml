@@ -1,0 +1,26 @@
+﻿@model IEnumerable<Workflow.Domain.Entities.Service>
+@{
+    Layout = "_ListLayout";
+    ViewBag.Title = "Liste des services";
+    ViewBag.Breadcrumb = "Services";
+    ViewBag.ButtonLabel = "Nouveau service";
+    ViewBag.controller = "Service";
+}
+
+@section Table {
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Service</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var s in Model)
+            {
+                <tr data-id="@s.Id" style="cursor:pointer;" onclick="location.href='@Url.Action("Details", new { id = s.Id })'">
+                    <td>@s.Nom</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

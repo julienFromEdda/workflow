@@ -1,0 +1,59 @@
+﻿@using Workflow.Domain.Enums
+@using Workflow.Domain.Extensions
+@using Workflow.Domain.Security
+@using Workflow.UI.Helpers
+@model Workflow.Domain.Entities.Service
+@{
+    Layout = "_DetailLayout";
+    ViewBag.Title = "Détail du service";
+    ViewBag.Breadcrumb = "Services";
+}
+
+@section Actions {
+    <div class="dropdown">
+        <button class="btn btn-success fs-6 dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Actions
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+            @if (User.HasClaim("permission", Permissions.Dossier.Acces))
+            {
+                <li><a class="dropdown-item" href="#" onclick="loadModalContent('modal', '/Service/Edit/@Model.Id', 'Modifier')">Modifier</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="#" onclick="loadModalContent('modal', '/Service/Delete/@Model.Id', 'Supprimer')">Supprimer</a></li>
+            }
+        </ul>
+    </div>
+}
+
+@section Content {
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">Informations générales</div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Titre</dt>
+                <dd class="col-sm-9">@Model.Nom</dd>
+            </dl>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">Utilisateurs</div>
+        <div class="card-body">
+            @if (Model.Employes != null && Model.Employes.Any())
+            {
+                <ul class="list-group mb-3">
+                    @foreach (var utilisateur in Model.Employes)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            @utilisateur.Prenom @utilisateur.Nom (@utilisateur.Email)
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <p class="text-muted">Aucun utilisateur associé.</p>
+            }
+        </div>
+    </div>
+}
